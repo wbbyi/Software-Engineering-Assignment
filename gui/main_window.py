@@ -8,7 +8,7 @@ class ShapeApp:
         self.root = root
         self.root.title("图形计算器")
         self.root.geometry("500x400")   # 设置窗口大小
-        self.root.grid_columnconfigure(0, weight=1)  # 列自适应
+        self.root.grid_columnconfigure(0, weight=1)
         self.root.grid_columnconfigure(1, weight=1)
 
         # 图形映射
@@ -38,6 +38,7 @@ class ShapeApp:
         self.param_frame = ttk.Frame(root)
         self.param_frame.grid(row=1, column=0, columnspan=2, pady=20)
         self.entries = {}
+        self.param_translation = {}  # 中文 -> 英文参数映射
         self.update_fields()
 
         # 结果显示
@@ -54,28 +55,31 @@ class ShapeApp:
         for widget in self.param_frame.winfo_children():
             widget.destroy()
         self.entries.clear()
+        self.param_translation.clear()
 
         shape = self.shape_var.get()
         fields = {
-            "三角形": ["a", "b", "c"],
-            "矩形": ["length", "width"],
-            "正方形": ["side"],
-            "平行四边形": ["base", "height"],
-            "菱形": ["d1", "d2", "side"],
-            "梯形": ["base1", "base2", "height", "side1", "side2"],
-            "正六边形": ["side"],
-            "圆形": ["radius"],
+            "三角形": [("边a", "a"), ("边b", "b"), ("边c", "c")],
+            "矩形": [("长度", "length"), ("宽度", "width")],
+            "正方形": [("边长", "side")],
+            "平行四边形": [("底边", "base"), ("高", "height"), ("侧边", "side")],
+            "菱形": [("对角线1", "d1"), ("对角线2", "d2"), ("边长", "side")],
+            "梯形": [("上底", "base1"), ("下底", "base2"), ("高", "height"), ("左边", "side1"), ("右边", "side2")],
+            "正六边形": [("边长", "side")],
+            "圆形": [("半径", "radius")],
         }[shape]
 
-        for i, f in enumerate(fields):
-            ttk.Label(self.param_frame, text=f"{f}:").grid(row=i, column=0, padx=5, pady=5, sticky="e")
+        for i, (ch_name, en_name) in enumerate(fields):
+            ttk.Label(self.param_frame, text=f"{ch_name}:").grid(row=i, column=0, padx=5, pady=5, sticky="e")
             entry = ttk.Entry(self.param_frame)
             entry.grid(row=i, column=1, padx=5, pady=5, sticky="w")
-            self.entries[f] = entry
+            self.entries[ch_name] = entry
+            self.param_translation[ch_name] = en_name  # 保存中文 -> 英文映射
 
     def calculate(self):
         try:
-            params = {k: float(v.get()) for k, v in self.entries.items()}
+            # 中文 -> 英文转换
+            params = {self.param_translation[k]: float(v.get()) for k, v in self.entries.items()}
             shape_cls = self.shape_classes[self.shape_var.get()]
             shape = shape_cls(**params)
             area, peri = shape.area(), shape.perimeter()
@@ -85,7 +89,7 @@ class ShapeApp:
 
     def plot(self):
         try:
-            params = {k: float(v.get()) for k, v in self.entries.items()}
+            params = {self.param_translation[k]: float(v.get()) for k, v in self.entries.items()}
             draw_shape(self.shape_var.get(), params)
         except Exception as e:
             messagebox.showerror("错误", str(e))
