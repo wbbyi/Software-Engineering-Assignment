@@ -2,7 +2,20 @@ from .base import Shape
 
 class Parallelogram(Shape):
     def __init__(self, base: float, height: float, side: float):
-        self.base, self.height, self.side = base, height, side
+        try:
+            base = float(base)
+            height = float(height)
+            side = float(side)
+        except ValueError:
+            raise ValueError("底边、高、侧边必须为数字")
+
+        if base <= 0 or height <= 0 or side <= 0:
+            raise ValueError("底边、高、侧边必须为正数")
+
+        self.base = base
+        self.height = height
+        self.side = side
+
 
     def area(self) -> float:
         return self.base * self.height

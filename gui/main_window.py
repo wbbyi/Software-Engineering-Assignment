@@ -38,7 +38,7 @@ class ShapeApp:
         self.param_frame = ttk.Frame(root)
         self.param_frame.grid(row=1, column=0, columnspan=2, pady=20)
         self.entries = {}
-        self.param_translation = {}  # 中文 -> 英文参数映射
+        self.param_translation = {}
         self.update_fields()
 
         # 结果显示
@@ -62,7 +62,7 @@ class ShapeApp:
             "三角形": [("边a", "a"), ("边b", "b"), ("边c", "c")],
             "矩形": [("长度", "length"), ("宽度", "width")],
             "正方形": [("边长", "side")],
-            "平行四边形": [("底边", "base"), ("高", "height"), ("侧边", "side")],
+            "平行四边形": [("底边", "base"), ("高", "height"), ("边长", "side")],
             "菱形": [("对角线1", "d1"), ("对角线2", "d2"), ("边长", "side")],
             "梯形": [("上底", "base1"), ("下底", "base2"), ("高", "height"), ("左边", "side1"), ("右边", "side2")],
             "正六边形": [("边长", "side")],
@@ -74,18 +74,18 @@ class ShapeApp:
             entry = ttk.Entry(self.param_frame)
             entry.grid(row=i, column=1, padx=5, pady=5, sticky="w")
             self.entries[ch_name] = entry
-            self.param_translation[ch_name] = en_name  # 保存中文 -> 英文映射
+            self.param_translation[ch_name] = en_name
 
     def calculate(self):
         try:
-            # 中文 -> 英文转换
             params = {self.param_translation[k]: float(v.get()) for k, v in self.entries.items()}
             shape_cls = self.shape_classes[self.shape_var.get()]
             shape = shape_cls(**params)
             area, peri = shape.area(), shape.perimeter()
             self.result_label.config(text=f"面积: {area:.2f}, 周长: {peri:.2f}")
         except Exception as e:
-            messagebox.showerror("错误", str(e))
+            # 将错误显示在 label 上，而不是弹窗
+            self.result_label.config(text=f"错误: {str(e)}")
 
     def plot(self):
         try:
